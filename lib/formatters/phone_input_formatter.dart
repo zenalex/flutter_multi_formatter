@@ -60,16 +60,11 @@ class PhoneInputFormatter extends TextInputFormatter {
 
   String get masked => _lastValue;
 
-  String get unmasked => '+${toNumericString(
-        _lastValue,
-        allowHyphen: false,
-        allowAllZeroes: true,
-      )}';
+  String get unmasked =>
+      '+${toNumericString(_lastValue, allowHyphen: false, allowAllZeroes: true)}';
 
-  bool get isFilled => isPhoneValid(
-        masked,
-        defaultCountryCode: defaultCountryCode,
-      );
+  bool get isFilled =>
+      isPhoneValid(masked, defaultCountryCode: defaultCountryCode);
 
   @override
   TextEditingValue formatEditUpdate(
@@ -79,10 +74,7 @@ class PhoneInputFormatter extends TextInputFormatter {
     var isErasing = newValue.text.length < oldValue.text.length;
     _lastValue = newValue.text;
 
-    var onlyNumbers = toNumericString(
-      newValue.text,
-      allowAllZeroes: true,
-    );
+    var onlyNumbers = toNumericString(newValue.text, allowAllZeroes: true);
     String maskedValue;
     if (isErasing) {
       if (newValue.text.isEmpty) {
@@ -94,14 +86,11 @@ class PhoneInputFormatter extends TextInputFormatter {
       /// меняем ее на 7
       var isRussianWrongNumber =
           onlyNumbers[0] == '8' && onlyNumbers[1] == '9' ||
-              onlyNumbers[0] == '8' && onlyNumbers[1] == '3';
+          onlyNumbers[0] == '8' && onlyNumbers[1] == '3';
       if (isRussianWrongNumber) {
         onlyNumbers = '7${onlyNumbers.substring(1)}';
         _countryData = null;
-        _applyMask(
-          '7',
-          allowEndlessPhone,
-        );
+        _applyMask('7', allowEndlessPhone);
       }
 
       final isAustralianPhoneNumber =
@@ -122,9 +111,7 @@ class PhoneInputFormatter extends TextInputFormatter {
           baseOffset: oldValue.selection.baseOffset,
           extentOffset: oldValue.selection.baseOffset,
         );
-        return oldValue.copyWith(
-          selection: newSelection,
-        );
+        return oldValue.copyWith(selection: newSelection);
       }
       return oldValue;
     }
@@ -134,9 +121,7 @@ class PhoneInputFormatter extends TextInputFormatter {
 
     _lastValue = maskedValue;
     return TextEditingValue(
-      selection: TextSelection.collapsed(
-        offset: selectionEnd,
-      ),
+      selection: TextSelection.collapsed(offset: selectionEnd),
       text: maskedValue,
     );
   }
@@ -154,10 +139,7 @@ class PhoneInputFormatter extends TextInputFormatter {
     }
   }
 
-  String _applyMask(
-    String numericString,
-    bool allowEndlessPhone,
-  ) {
+  String _applyMask(String numericString, bool allowEndlessPhone) {
     if (numericString.isEmpty) {
       _updateCountryData(null);
     } else {
@@ -297,13 +279,7 @@ bool isPhoneValid(
   }
   final cMask = countryData.getCorrectMask(defaultCountryCode);
   final cAltMasks = countryData.getCorrectAltMasks(defaultCountryCode);
-  var formatted = _formatByMask(
-    phone,
-    cMask,
-    cAltMasks,
-    0,
-    allowEndlessPhone,
-  );
+  var formatted = _formatByMask(phone, cMask, cAltMasks, 0, allowEndlessPhone);
   final preProcessed = toNumericString(
     formatted,
     allowHyphen: false,
@@ -316,9 +292,7 @@ bool isPhoneValid(
   }
   var correctLength = formatted.length == cMask.length;
   if (correctLength != true && cAltMasks != null) {
-    return cAltMasks.any(
-      (altMask) => formatted.length == altMask.length,
-    );
+    return cAltMasks.any((altMask) => formatted.length == altMask.length);
   }
   return correctLength;
 }
@@ -349,20 +323,14 @@ String? formatAsPhoneNumber(
         break;
     }
   }
-  phone = toNumericString(
-    phone,
-    errorText: null,
-    allowAllZeroes: true,
-  );
+  phone = toNumericString(phone, errorText: null, allowAllZeroes: true);
   PhoneCountryData? countryData;
   if (defaultCountryCode != null) {
     countryData = PhoneCodes.getPhoneCountryDataByCountryCode(
       defaultCountryCode,
     );
   } else {
-    countryData = PhoneCodes.getCountryDataByPhone(
-      phone,
-    );
+    countryData = PhoneCodes.getCountryDataByPhone(phone);
   }
 
   if (countryData != null) {
@@ -374,13 +342,7 @@ String? formatAsPhoneNumber(
       allowEndlessPhone,
     );
   } else {
-    return _formatByMask(
-      phone,
-      defaultMask!,
-      null,
-      0,
-      allowEndlessPhone,
-    );
+    return _formatByMask(phone, defaultMask!, null, 0, allowEndlessPhone);
   }
 }
 
@@ -457,10 +419,7 @@ String _formatByMask(
 /// the list will contain one [PhoneCountryData] at max
 /// [returns] A list of [PhoneCountryData] datas or an empty list
 List<PhoneCountryData> getCountryDatasByPhone(String phone) {
-  phone = toNumericString(
-    phone,
-    allowAllZeroes: true,
-  );
+  phone = toNumericString(phone, allowAllZeroes: true);
   if (phone.isEmpty || phone.length < 11) {
     return <PhoneCountryData>[];
   }
@@ -493,15 +452,11 @@ class PhoneCountryData {
 
   @override
   int get hashCode {
-    return Object.hash(
-      phoneCode,
-      internalPhoneCode,
-      country,
-    );
+    return Object.hash(phoneCode, internalPhoneCode, country);
   }
 
   String getCorrectMask(String? countryCode) {
-    if (countryCode != null) {
+    if (countryCode == null) {
       return phoneMask!;
     }
     return phoneMaskWithoutCountryCode;
@@ -566,7 +521,8 @@ class PhoneCountryData {
     if (_altMasksWithoutCountryCodes != null) {
       return _altMasksWithoutCountryCodes;
     }
-    _altMasksWithoutCountryCodes = altMasks
+    _altMasksWithoutCountryCodes =
+        altMasks
             ?.map((e) => _trimPhoneCode(phoneMask: e, phoneCode: phoneCode!))
             .toList() ??
         <String>[];
@@ -607,10 +563,7 @@ class PhoneCountryData {
     };
   }
 
-  factory PhoneCountryData.fromMap(
-    Map value, {
-    String lang = '',
-  }) {
+  factory PhoneCountryData.fromMap(Map value, {String lang = ''}) {
     final countryData = PhoneCountryData._init(
       country: value['country$lang'],
 
@@ -642,9 +595,7 @@ class PhoneCodes {
   }) {
     final list = <PhoneCountryData>[];
     for (var code in countryIsoCodes) {
-      final data = getPhoneCountryDataByCountryCode(
-        code,
-      );
+      final data = getPhoneCountryDataByCountryCode(code);
       if (data != null) {
         list.add(data);
       }
@@ -653,9 +604,7 @@ class PhoneCodes {
   }
 
   /// Removes a country code from a phone
-  static String removeCountryCode(
-    String phoneWithCountryCode,
-  ) {
+  static String removeCountryCode(String phoneWithCountryCode) {
     final countryData = getCountryDataByPhone(phoneWithCountryCode);
     if (countryData != null) {
       phoneWithCountryCode = phoneWithCountryCode.replaceAll('+', '').trim();
@@ -677,10 +626,7 @@ class PhoneCodes {
 
     var rawData = _data.firstWhereOrNull(
       (data) =>
-          toNumericString(
-            data['internalPhoneCode'],
-            allowAllZeroes: true,
-          ) ==
+          toNumericString(data['internalPhoneCode'], allowAllZeroes: true) ==
           phoneCode,
     );
     if (rawData != null) {
@@ -695,10 +641,7 @@ class PhoneCodes {
     phoneCode = phoneCode.replaceAll('+', '');
     var list = <PhoneCountryData>[];
     _data.forEach((data) {
-      var c = toNumericString(
-        data['internalPhoneCode'],
-        allowAllZeroes: true,
-      );
+      var c = toNumericString(data['internalPhoneCode'], allowAllZeroes: true);
       if (c == phoneCode) {
         list.add(PhoneCountryData.fromMap(data));
       }
@@ -710,9 +653,7 @@ class PhoneCodes {
 
   /// [returns] a list of all available country codes like
   /// ['RU', 'US', 'GB'] etc
-  static List<String> getAllCountryCodes({
-    bool isForce = false,
-  }) {
+  static List<String> getAllCountryCodes({bool isForce = false}) {
     if (_countryCodes == null || isForce) {
       _countryCodes = _data.map((e) => e['countryCode'].toString()).toList();
     }
@@ -733,9 +674,11 @@ class PhoneCodes {
   }) {
     if (_allCountryDatas == null || isForce) {
       _allCountryDatas = _data
-          .map((e) => e.containsKey('country${langCode.toUpperCase()}')
-              ? PhoneCountryData.fromMap(e, lang: langCode)
-              : PhoneCountryData.fromMap(e))
+          .map(
+            (e) => e.containsKey('country${langCode.toUpperCase()}')
+                ? PhoneCountryData.fromMap(e, lang: langCode)
+                : PhoneCountryData.fromMap(e),
+          )
           .toList();
       _allCountryDatas!.sort((a, b) => a.phoneCode!.compareTo(b.phoneCode!));
     }
@@ -830,7 +773,7 @@ class PhoneCodes {
       'internalPhoneCode': '374',
       'countryCode': 'AM',
       'phoneMask': '+000 000 000 00',
-      'altMasks': ['+000 000 000 0000']
+      'altMasks': ['+000 000 000 0000'],
     },
     {
       'country': 'Aruba',
@@ -845,9 +788,7 @@ class PhoneCodes {
       'internalPhoneCode': '61',
       'countryCode': 'AU',
       'phoneMask': '+00 0000 0000',
-      'altMasks': [
-        '+00 0 0000 0000',
-      ],
+      'altMasks': ['+00 0 0000 0000'],
     },
     {
       'country': 'Austria',
@@ -958,9 +899,7 @@ class PhoneCodes {
       'internalPhoneCode': '55',
       'countryCode': 'BR',
       'phoneMask': '+00 (00) 00000-0000',
-      'altMasks': [
-        '+00 (00) 0000-0000',
-      ],
+      'altMasks': ['+00 (00) 0000-0000'],
     },
     {
       'country': 'British Indian Ocean Territory',
@@ -1112,7 +1051,7 @@ class PhoneCodes {
         '+000 00 000 0000 0',
         '+000 00 000 0000 00',
         '+000 00 000 0000 000',
-      ]
+      ],
     },
     {
       'country': 'Cuba',
@@ -1127,11 +1066,7 @@ class PhoneCodes {
       'internalPhoneCode': '357',
       'countryCode': 'CY',
       'phoneMask': '+000 0 000 0000',
-      'altMasks': [
-        '+000 00 0000000',
-        '+000 00 00000000',
-        '+000 00 000000000',
-      ]
+      'altMasks': ['+000 00 0000000', '+000 00 00000000', '+000 00 000000000'],
     },
     {
       'country': 'Czech Republic',
@@ -1143,7 +1078,7 @@ class PhoneCodes {
         '+000 000 000 000 0',
         '+000 000 000 000 00',
         '+000 000 000 000 000',
-      ]
+      ],
     },
     {
       'country': 'Denmark',
@@ -1214,11 +1149,7 @@ class PhoneCodes {
       'internalPhoneCode': '372',
       'countryCode': 'EE',
       'phoneMask': '+000 000 000',
-      'altMasks': [
-        '+000 000 0000',
-        '+000 0000 0000',
-        '+000 000000000',
-      ]
+      'altMasks': ['+000 000 0000', '+000 0000 0000', '+000 000000000'],
     },
     {
       'country': 'Ethiopia',
@@ -1307,7 +1238,7 @@ class PhoneCodes {
         '+00 00 000000000',
         '+00 00 0000000000',
         '+00 00 00000000000',
-      ]
+      ],
     },
     {
       'country': 'Ghana',
@@ -1406,9 +1337,7 @@ class PhoneCodes {
       'internalPhoneCode': '36',
       'countryCode': 'HU',
       'phoneMask': '+00 0 000 0000',
-      'altMasks': [
-        '+00 00 000 0000',
-      ],
+      'altMasks': ['+00 00 000 0000'],
     },
     {
       'country': 'Hungary (Alternative)',
@@ -1416,9 +1345,7 @@ class PhoneCodes {
       'internalPhoneCode': '06',
       'countryCode': 'HU',
       'phoneMask': '+00 0 000 0000',
-      'altMasks': [
-        '+00 00 000 0000',
-      ],
+      'altMasks': ['+00 00 000 0000'],
     },
     {
       'country': 'Iceland',
@@ -1440,9 +1367,7 @@ class PhoneCodes {
       'internalPhoneCode': '62',
       'countryCode': 'ID',
       'phoneMask': '+00 00 0000 0000',
-      'altMasks': [
-        '+00 000 0000 0000',
-      ],
+      'altMasks': ['+00 000 0000 0000'],
     },
     {
       'country': 'Iraq',
@@ -1457,10 +1382,7 @@ class PhoneCodes {
       'internalPhoneCode': '353',
       'countryCode': 'IE',
       'phoneMask': '+000 00 000 0000',
-      'altMasks': [
-        '+000 00 000 0000 0',
-        '+000 00 000 0000 00',
-      ],
+      'altMasks': ['+000 00 000 0000 0', '+000 00 000 0000 00'],
     },
     {
       'country': 'Israel',
@@ -1475,10 +1397,7 @@ class PhoneCodes {
       'internalPhoneCode': '39',
       'countryCode': 'IT',
       'phoneMask': '+00 00 000 0000',
-      'altMasks': [
-        '+00 000 000 0000',
-        '+00 00 0000 00000',
-      ],
+      'altMasks': ['+00 000 000 0000', '+00 00 0000 00000'],
     },
     {
       'country': 'Jamaica',
@@ -1578,9 +1497,7 @@ class PhoneCodes {
       'internalPhoneCode': '370',
       'countryCode': 'LT',
       'phoneMask': '+000 000 0000',
-      'altMasks': [
-        '+000 000 00000',
-      ]
+      'altMasks': ['+000 000 00000'],
     },
     {
       'country': 'Luxembourg',
@@ -1609,9 +1526,7 @@ class PhoneCodes {
       'internalPhoneCode': '60',
       'countryCode': 'MY',
       'phoneMask': '+00 0 000 0000',
-      'altMasks': [
-        '+00 00 000 0000',
-      ],
+      'altMasks': ['+00 00 000 0000'],
     },
     {
       'country': 'Maldives',
@@ -1701,7 +1616,7 @@ class PhoneCodes {
         '+000 000 000 000 0',
         '+000 000 000 000 00',
         '+000 000 000 000 000',
-      ]
+      ],
     },
     {
       'country': 'Montserrat',
@@ -1772,10 +1687,7 @@ class PhoneCodes {
       'internalPhoneCode': '64',
       'countryCode': 'NZ',
       'phoneMask': '+00 (0) 000 0000',
-      'altMasks': [
-        '+00 (00) 000 0000',
-        '+00 (000) 000 0000',
-      ],
+      'altMasks': ['+00 (00) 000 0000', '+00 (000) 000 0000'],
     },
     {
       'country': 'Nicaragua',
@@ -1895,10 +1807,7 @@ class PhoneCodes {
       'internalPhoneCode': '351',
       'countryCode': 'PT',
       'phoneMask': '+000 000 000 000',
-      'altMasks': [
-        '+000 000 000 000 0',
-        '+000 000 000 000 00',
-      ],
+      'altMasks': ['+000 000 000 000 0', '+000 000 000 000 00'],
     },
     {
       'country': 'Puerto Rico',
@@ -2181,9 +2090,7 @@ class PhoneCodes {
       'internalPhoneCode': '971',
       'countryCode': 'AE',
       'phoneMask': '+000 00 000000',
-      'altMasks': [
-        '+000 00 0000000',
-      ],
+      'altMasks': ['+000 00 0000000'],
     },
     {
       'country': 'United Kingdom',
@@ -2408,11 +2315,7 @@ class PhoneCodes {
       'internalPhoneCode': '247',
       'countryCode': 'AC',
       'phoneMask': '+000 000000',
-      'altMasks': [
-        '+000 00000',
-        '+000 00000-00000',
-        '+000 000000-000000',
-      ]
+      'altMasks': ['+000 00000', '+000 00000-00000', '+000 000000-000000'],
     },
     {
       'country': 'Saint Barthélemy',
@@ -2539,6 +2442,6 @@ class PhoneCodes {
       'internalPhoneCode': '1340',
       'countryCode': 'VI',
       'phoneMask': '+0 (000) 000 0000',
-    }
+    },
   ];
 }
